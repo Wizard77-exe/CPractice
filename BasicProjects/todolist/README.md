@@ -8,6 +8,7 @@ Just some sort of to-do list that doesn't save your tasks everytime you exit.
 - deleting tasks
 - marking a tasks as done
 - displaying finished tasks
+- reset finished Tasks
 ---
 ## Required Modules
 - <stdio.h>
