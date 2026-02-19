@@ -27,7 +27,7 @@ bool has_special_char(const char *filename)
 }
 
 // Function to create a file
-void create_file(void)
+void create_file(void) 
 {
     // FILE *filePointer = fopen("filename", "mode");
     char filename[50];
@@ -60,6 +60,72 @@ void create_file(void)
     fclose(file); // close the file
 }
 
+//Function to write to a file
+void append_2_file() 
+{
+    char filename[50];
+
+    printf("Enter filename: ");
+    fgets(filename, 50, stdin);
+    filename[strcspn(filename, "\n")] = '\0';
+
+    FILE *file;
+    if ((file = fopen(filename, "r")) == NULL) { //check if file doesn't exists
+        printf("Error 404: File Not Found! XD\n");
+        return;
+    }
+
+    file = fopen(filename, "a");
+    // validation
+    if (file == NULL) {
+        printf("Error in Opening a file\n");
+        return;
+    }
+    char buffer[1000];
+    printf("You can only write up to 1000 characters at a time.\n");
+    printf("Enter \"q\" to quit.\n");
+    while (1) {
+        fgets(buffer, 1000, stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+        if (buffer[0] == 'q') {
+            break;
+        }
+        fprintf(file, strcat(buffer, "\n"));
+    }
+    fclose(file);
+    printf("Successfully Added File Content!\n");
+    return;
+    
+}
+
+void rewrite_file_content() {
+
+    if (true) { //check if file exists
+        printf("Error 404: File Not Found! XD\n");
+        return;
+    }
+}
+
+void delete_file() {
+    if (true) { //check if file exists
+        printf("Error 404: File Not Found! XD\n");
+        return;
+    }
+}
+
+void rename_file() {
+    if (true) { //check if file exists
+        printf("Error 404: File Not Found! XD\n");
+        return;
+    }
+}
+void read_file() {
+    if (true) { //check if file exists
+        printf("Error 404: File Not Found! XD \n");
+        return;
+    }
+}
+
 int main()
 {
     int choice;
@@ -81,18 +147,14 @@ int main()
 
         switch(choice) {
             case 1: create_file(); break;
+            case 2: append_2_file(); break;
+            case 3: rewrite_file_content(); break;
+            case 4: delete_file(); break;
+            case 5: rename_file(); break;
+            case 6: read_file(); break;
             case 7: exit(0);
             default: printf("Invalid Choice!\n");
         }
-
-        /*
-        1. Creating a File
-        2. Adding Content to a File (Appending)
-        3. Rewriting the whole content of a File
-        4. Deleting a File
-        5. Renaming a File
-        6. Reading a File
-        */
     }
     return 0;
 }
