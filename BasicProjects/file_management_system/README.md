@@ -13,7 +13,9 @@ and do other works with files.
 ## Required Modules
 - <stdio.h>
 - <stdlib.h>
-- <string.h> optional
+- <string.h> 
+- <stdbool.h>
+- <ctype.h>
 ---
 ## Cloning 
 ```bash
