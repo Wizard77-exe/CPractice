@@ -165,16 +165,27 @@ void rename_file() {
 }
 void read_file() {
     char filename[MAX_FILENAME + 1];
-    
-    printf("Enter the filename: ");
-    fgets(filename, sizeof(filename), stdin);
-    filename[strcspn(filename, "\n")] = '\0';
 
-    FILE *file = fopen(filename, "r");
-    if (true) { //check if file exists
+    FILE *file = fopen(check_filename(filename, sizeof(filename)), "r");
+
+    if (!file) { //check if file exists
         printf("Error 404: File Not Found! XD \n");
         return;
     }
+
+    int ch;
+
+    printf("Content of %s:\n", filename);
+    while((ch = fgetc(file)) != EOF) {
+        putchar(ch);
+    }
+    putchar('\n');
+
+    if(fclose(file) != 0) {
+        perror("fclose");
+        return;
+    }
+    return;
 }
 
 int main()
