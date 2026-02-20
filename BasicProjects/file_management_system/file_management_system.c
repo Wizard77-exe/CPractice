@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#define MAX_FILENAME 255
+
 // Custom function to clear the stdin buffer
 void clear_stdin_line(void)
 {
@@ -26,84 +28,126 @@ bool has_special_char(const char *filename)
     return false;
 }
 
+char *check_filename(char *filename, size_t size)
+{
+    bool invalid;
+    do
+    {
+        printf("Enter your desired filename: ");
+        fgets(filename, size, stdin);
+        filename[strcspn(filename, "\n")] = '\0';
+
+        if (strlen(filename) == 0)
+        {
+            printf("Filename cannot be empty!\n");
+            continue;
+        }
+
+        invalid = has_special_char(filename);
+        if (invalid)
+            printf("Filename must not contain special character!\n");
+    } while (invalid);
+
+    return filename;
+}
+
 // Function to create a file
 void create_file(void) 
 {
     // FILE *filePointer = fopen("filename", "mode");
-    char filename[50];
-    bool invalid;
-    do
-    {
-        // gets the filename based on the user's preference
-        printf("Enter your desired filename: ");
-        fgets(filename, 50, stdin);
+    char filename[MAX_FILENAME + 1];
 
-        // change the newline character in the end of the filename to a null terminator
-        filename[strcspn(filename, "\n")] = '\0';
-
-        // checks if the filename is not allowed or allowed
-        invalid = has_special_char(filename);
-        // give feedback to user
-        if (invalid)
-        {
-            printf("Filename must not contain special character! \n");
-        }
-    } while (invalid);
-
-    // Creating a File
-    FILE *file = fopen(filename, "w"); // "w" for writing, creates file if not exists
-    if (file == NULL)
-    {
-        printf("Error Creating a File! Try Again!\n");
+    FILE *file = fopen(check_filename(filename, sizeof(filename)), "wx");
+    if (!file) {
+        perror("fopen");
         return;
     }
-    fclose(file); // close the file
+
+    if(fclose(file) != 0) {
+        perror("Error closing the file");
+        return;
+    }
+    printf("File Created Successfully!\n");
+    return;
 }
 
 //Function to write to a file
 void append_2_file() 
 {
-    char filename[50];
+    char filename[MAX_FILENAME + 1];
 
-    printf("Enter filename: ");
-    fgets(filename, 50, stdin);
-    filename[strcspn(filename, "\n")] = '\0';
-
-    FILE *file;
-    if ((file = fopen(filename, "r")) == NULL) { //check if file doesn't exists
+    FILE *file = fopen(check_filename(filename, sizeof(filename)), "r+");
+    if (!file) { //check if file doesn't exists
         printf("Error 404: File Not Found! XD\n");
         return;
     }
 
-    file = fopen(filename, "a");
-    // validation
-    if (file == NULL) {
-        printf("Error in Opening a file\n");
-        return;
-    }
+    fseek(file, 0, SEEK_END);
+
     char buffer[1000];
+
     printf("You can only write up to 1000 characters at a time.\n");
     printf("Enter \"q\" to quit.\n");
+
     while (1) {
-        fgets(buffer, 1000, stdin);
-        buffer[strcspn(buffer, "\n")] = '\0';
-        if (buffer[0] == 'q') {
+        if (!fgets(buffer, sizeof(buffer), stdin))
             break;
-        }
-        fprintf(file, strcat(buffer, "\n"));
+
+        buffer[strcspn(buffer, "\n")] = '\0';
+        if (strcmp(buffer, "q") == 0) 
+            break;
+
+        fprintf(file, "%s\n", buffer);
     }
-    fclose(file);
+
+    if (fclose(file) != 0) {
+        perror("fclose");
+        return;
+    }
+
     printf("Successfully Added File Content!\n");
     return;
     
 }
 
 void rewrite_file_content() {
+    char filename[MAX_FILENAME + 1];
 
-    if (true) { //check if file exists
+    FILE *file = fopen(check_filename(filename, sizeof(filename)), "r+");
+    if (!file) { //check if file doesn't exists
         printf("Error 404: File Not Found! XD\n");
         return;
     }
+
+    //automatic truncate
+    if (freopen(filename, "w", file) == NULL) {
+        perror("Truncate");
+        return;
+    }
+
+    char buffer[1000];
+
+    printf("You can only write up to 1000 characters at a time.\n");
+    printf("Enter \"q\" to quit.\n");
+
+    while (1) {
+        if (!fgets(buffer, sizeof(buffer), stdin))
+            break;
+
+        buffer[strcspn(buffer, "\n")] = '\0';
+        if (strcmp(buffer, "q") == 0) 
+            break;
+
+        fprintf(file, "%s\n", buffer);
+    }
+
+    if (fclose(file) != 0) {
+        perror("fclose");
+        return;
+    }
+
+    printf("Successfully Rewrote File Content!\n");
+    return;
 }
 
 void delete_file() {
@@ -120,6 +164,13 @@ void rename_file() {
     }
 }
 void read_file() {
+    char filename[MAX_FILENAME + 1];
+    
+    printf("Enter the filename: ");
+    fgets(filename, sizeof(filename), stdin);
+    filename[strcspn(filename, "\n")] = '\0';
+
+    FILE *file = fopen(filename, "r");
     if (true) { //check if file exists
         printf("Error 404: File Not Found! XD \n");
         return;
@@ -135,7 +186,7 @@ int main()
         printf("File Management System V 1.0.0\n");
         printf("==============================\n\n");
         printf("1. Create a File\n");
-        printf("2. Write to a File\n");
+        printf("2. Append Content to a File\n");
         printf("3. Rewrite a whole File\n");
         printf("4. Delete a File\n");
         printf("5. Rename a File\n");
