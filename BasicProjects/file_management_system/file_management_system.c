@@ -158,8 +158,17 @@ void delete_file() {
 }
 
 void rename_file() {
-    if (true) { //check if file exists
-        printf("Error 404: File Not Found! XD\n");
+    char new_filename[MAX_FILENAME + 1];
+    char old_filename[MAX_FILENAME + 1];
+
+    check_filename(old_filename, sizeof(old_filename));
+    check_filename(new_filename, sizeof(new_filename));
+
+    if(rename(old_filename, new_filename) == 0) {
+        printf("File renamed Successfully!\n");
+        return;
+    } else {
+        perror("Error Renaming");
         return;
     }
 }
