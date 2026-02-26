@@ -8,45 +8,23 @@
 // ARRAY OF WORDS
 const char words[WORDS_NUM][MAX_WORD_LEN] = {
     "CLOUD", "MANGO", "BURGER", "GUITAR", "PUZZLE", "RHYTHM", "FLOWER", "CASTLE", "BANANA", "MONKEY", "COFFEE",
-    "PHONE", "WALLET", "SPORTS", "DANCE", "FROZEN", "WIZARD", "PLANET", "BURGER", "KEYBOARD"
-};
+    "PHONE", "WALLET", "SPORTS", "DANCE", "FROZEN", "WIZARD", "PLANET", "BURGER", "KEYBOARD"};
 
 unsigned int currIndex = 0;
 
-void printUnderline(const char *s) {
-    printf("Hidden Word: ");
-    while(*s) {
-        printf("_");
-        s++;
-    }
-    printf("\n");
-}
-
-void flushInput() {
+void flushInput()
+{
     int ch;
-    while ((ch = getchar()) != '\n' && ch != EOF);
+    while ((ch = getchar()) != '\n' && ch != EOF)
+        ;
 }
 
-void guess() {
-    char guessChar;
-    const char *word = words[currIndex];
-    printUnderline(word);
-    //Main thing
-    printf("Enter your guess: ");
-    scanf("%c", &guessChar);
-    flushInput();
-    printf("Hidden Word: ");
-    while(*word) {
-        if(*word == guessChar) {
-            printf("%c", guessChar);
-        }else{
-            printf("_");
-        }
-        word++;
-    }
-}
 
-int main() {
-    guess();
+
+void guessChar();
+
+int main()
+{
+    
     return 0;
 }
