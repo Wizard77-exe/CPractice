@@ -15,10 +15,18 @@ for persistence.
 ---
 ### Cloning
 1. Clone the Repository
-`git clone https://github.com/Wizard77-exe/CPractice`
+```bash
+git clone https://github.com/Wizard77-exe/CPractice
+```
 2. Go to the Directory of the cloned Repo
-`cd CPractice/BasicProjects/inventory-system`
+```bash
+cd CPractice/BasicProjects/inventory-system
+```
 3. Compile the C code
-`gcc inventory-system.c -o inventory-system`
+```bash
+gcc inventory-system.c -o inventory-system
+```
 4. Run the executable
-`./inventory-system`
+```bash
+./inventory-system
+```
