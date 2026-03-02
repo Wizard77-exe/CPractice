@@ -1,0 +1,4 @@
+Item Name: Apple                          Quantity: 30        
+Item Name: Apple                          Quantity: 30        
+Item Name: Mango                          Quantity: 80        
+Item Name: Airplanes                      Quantity: 100       
