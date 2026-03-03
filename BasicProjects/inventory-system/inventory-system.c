@@ -6,6 +6,11 @@
 #define BUFFER_SIZE 256
 #define FILENAME "inventory.txt"
 
+const char *RED = "\x1b[31m";
+const char *YELLOW = "\x1b[33m";
+const char *CYAN = "\x1b[36m";
+const char *RESET = "\x1b[0m";
+
 void flush_input()
 {
     int ch;
@@ -26,14 +31,36 @@ int parseItem(char *line, char *name, int *qty)
     name[len] = '\0';              // sets the last character to '\0' because strncpy don't automatically adds a null terminator
 
     while (len > 0 && name[len - 1] == ' ') // Removes trailing spaces
+    {
         name[--len] = '\0';
+    }
 
     return 1;
 }
 
+int isExisting(FILE *file, char *item)
+{
+    char line[BUFFER_SIZE];
+    char name[MAX_LEN];
+    int qty;
+
+    rewind(file);
+    while (fgets(line, BUFFER_SIZE, file) != NULL)
+    {
+        if (parseItem(line, name, &qty))
+        {
+            if (strcmp(item, name) == 0)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 void addItem()
 {
-    FILE *file = fopen(FILENAME, "a");
+    FILE *file = fopen(FILENAME, "a+");
     char item_name[MAX_LEN];
     unsigned int qty;
     if (!file)
@@ -42,20 +69,36 @@ void addItem()
         return;
     }
 
-    do
+    while (1)
     {
-        printf("\x1b[31mWarning:\x1b[0m Item Name cannot be Empty!\n");
-        printf("\x1b[33mEnter Item Name:\x1b[0m ");
+        printf("%sEnter Item Name:%s ", YELLOW, RESET);
         fgets(item_name, MAX_LEN, stdin);
         item_name[strcspn(item_name, "\n")] = '\0';
-    } while (strlen(item_name) == 0);
+
+        if (strlen(item_name) == 0)
+        {
+            printf("%sWarning:%s Item Name cannot be Empty!\n", RED, RESET);
+            continue;
+        }
+
+        if (isExisting(file, item_name))
+        {
+            printf("%sItem Already Exists!\n%s", RED, RESET);
+            continue;
+        }
+
+        break; // valid input
+    }
 
     do
     {
-        printf("\x1b[31mWarning:\x1b[0m Quantity cannot be Zero!\n");
-        printf("\x1b[33mEnter Quantity:\x1b[0m ");
-        scanf("%u", &qty);
-        flush_input();
+        printf("%sWarning:%s Quantity cannot be Zero!\n", RED, RESET);
+        printf("%sEnter Quantity:%s ", YELLOW, RESET);
+        if (scanf("%u", &qty) != 1)
+        {
+            printf("Invalid input!\n");
+            flush_input(); // clear stdin
+        }
     } while (qty == 0);
 
     fprintf(file, "Item Name: %-30s Quantity: %-10u\n", item_name, qty);
@@ -64,7 +107,7 @@ void addItem()
         perror("Fclose");
         return;
     }
-    printf("\x1b[34mSuccessfully Added an Item\x1b[0m\n\n");
+    printf("%s\nSuccessfully Added an Item%s\n", CYAN, RESET);
     return;
 }
 
@@ -79,17 +122,22 @@ void displayItems()
 
     char buffer[BUFFER_SIZE];
     printf("\n");
+    printf("==============================================================\n");
+    printf("%sINVENTORY LIST%s\n", CYAN, RESET);
+    printf("==============================================================\n");
     while (fgets(buffer, BUFFER_SIZE, file) != NULL)
     {
         printf("%s", buffer);
     }
+    printf("==============================================================\n");
 
     if (fclose(file) != 0)
     {
         perror("fclose");
         return;
     }
-    printf("\n\x1b[34mSuccessfully Displayed Items\x1b[0m\n\n");
+    printf("%sSuccessfully Displayed Items%s\n", CYAN, RESET);
+    printf("==============================================================\n");
     return;
 }
 
@@ -107,7 +155,7 @@ void deleteItem()
     char buffer[BUFFER_SIZE];
     char name[MAX_LEN];
     char item_name[MAX_LEN];
-    printf("Enter Item You Want to Delete: ");
+    printf("\n%sEnter Item You Want to Delete:%s ", YELLOW, RESET);
     fgets(item_name, 30, stdin);
     item_name[strcspn(item_name, "\n")] = '\0';
 
@@ -147,12 +195,12 @@ void deleteItem()
 
     if (!found)
     {
-        printf("\n\x1b[31mItem Not Found!\x1b[0m\n\n");
+        printf("\n%sItem Not Found!%s\n\n", RED, RESET);
         return;
     }
     else
     {
-        printf("\n\x1b[34mSuccessfully Deleted Item Record!\x1b[0m\n\n");
+        printf("\n%sSuccessfully Deleted Item Record!%s\n", CYAN, RESET);
         return;
     }
 }
@@ -174,7 +222,7 @@ void updateItem()
     char item_name[MAX_LEN];
     char buffer[BUFFER_SIZE];
 
-    printf("Enter the Item Name: ");
+    printf("\n%sEnter the Item Name:%s ", YELLOW, RESET);
     fgets(item_name, MAX_LEN, stdin);
     item_name[strcspn(item_name, "\n")] = '\0';
 
@@ -195,8 +243,8 @@ void updateItem()
             found = 1;
             do
             {
-                printf("\x1b[31mWarning:\x1b[0m Quantity cannot be Zero!\n");
-                printf("\x1b[33mEnter New Quantity:\x1b[0m ");
+                printf("%sWarning:%s Quantity cannot be Zero!\n", RED, RESET);
+                printf("%sEnter New Quantity:%s ", YELLOW, RESET);
                 if (scanf("%d", &qty) != 1)
                 {
                     printf("Invalid input!\n");
@@ -226,12 +274,12 @@ void updateItem()
 
     if (!found)
     {
-        printf("\n\x1b[31mItem Not Found!\x1b[0m\n\n");
+        printf("\n%sItem Not Found!%s\n", RED, RESET);
         return;
     }
     else
     {
-        printf("\n\x1b[34mSuccessfully Updated Item Record!\x1b[0m\n\n");
+        printf("\n%sSuccessfully Updated Item Record!%s\n", CYAN, RESET);
         return;
     }
 }
@@ -241,13 +289,14 @@ int main()
     int choice;
     while (1)
     {
-        printf("Inventory System\n");
-        printf("================\n");
-        printf("1. Add Item\n");
-        printf("2. Display Items\n");
-        printf("3. Delete Item Record\n");
-        printf("4. Update Item Record\n");
-        printf("0. Exit\n");
+        printf("\n==============================================================\n");
+        printf("%s                Inventory System V 1.0.0%s                  \n", CYAN, RESET);
+        printf("==============================================================\n");
+        printf("%s[1.]%s Add Item\n", YELLOW, RESET);
+        printf("%s[2.]%s Display Items\n", YELLOW, RESET);
+        printf("%s[3.]%s Delete Item Record\n", YELLOW, RESET);
+        printf("%s[4.]%s Update Item Record\n", YELLOW, RESET);
+        printf("%s[0.]%s Exit%s\n", YELLOW, RED, RESET);
 
         printf("\nEnter your choice: ");
         scanf("%d", &choice);
@@ -264,7 +313,7 @@ int main()
         case 3:
             deleteItem();
             break;
-        case 4: 
+        case 4:
             updateItem();
             break;
         case 0:
