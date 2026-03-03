@@ -116,18 +116,26 @@ void deleteItem()
 
     while (fgets(buffer, BUFFER_SIZE, file))
     {
-        if (parseItem(buffer, name, &qty))
+        if (!parseItem(buffer, name, &qty))
         {
-            if (strcmp(name, item_name) != 0)
-                fputs(buffer, temp);
-            else
-                found = 1;
+            fputs(buffer, temp);
+            continue;
         }
+
+        if (strcmp(name, item_name) != 0)
+            fputs(buffer, temp);
+        else
+            found = 1;
     }
 
-    if (fclose(file) != 0 || fclose(temp) != 0)
+    if (fclose(file) != 0)
     {
-        perror("fclose");
+        perror("fclose file");
+        return;
+    }
+    if (fclose(temp) != 0)
+    {
+        perror("fclose temp");
         return;
     }
 
@@ -139,12 +147,91 @@ void deleteItem()
 
     if (!found)
     {
-        printf("\n\x1b[33mItem Not Found!\x1b[0m\n\n");
+        printf("\n\x1b[31mItem Not Found!\x1b[0m\n\n");
         return;
     }
     else
     {
         printf("\n\x1b[34mSuccessfully Deleted Item Record!\x1b[0m\n\n");
+        return;
+    }
+}
+
+void updateItem()
+{
+    FILE *file = fopen(FILENAME, "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!file || !temp)
+    {
+        perror("fopen");
+        return;
+    }
+
+    int qty;
+    int found = 0;
+    char name[MAX_LEN];
+    char item_name[MAX_LEN];
+    char buffer[BUFFER_SIZE];
+
+    printf("Enter the Item Name: ");
+    fgets(item_name, MAX_LEN, stdin);
+    item_name[strcspn(item_name, "\n")] = '\0';
+
+    while (fgets(buffer, BUFFER_SIZE, file))
+    {
+        if (!parseItem(buffer, name, &qty))
+        {
+            fputs(buffer, temp);
+            continue;
+        }
+
+        if (strcmp(name, item_name) != 0)
+        {
+            fputs(buffer, temp);
+        }
+        else
+        {
+            found = 1;
+            do
+            {
+                printf("\x1b[31mWarning:\x1b[0m Quantity cannot be Zero!\n");
+                printf("\x1b[33mEnter New Quantity:\x1b[0m ");
+                if (scanf("%d", &qty) != 1)
+                {
+                    printf("Invalid input!\n");
+                    flush_input(); // clear stdin
+                }
+            } while (qty <= 0);
+            fprintf(temp, "Item Name: %-30s Quantity: %-10u\n", name, qty);
+        }
+    }
+
+    if (fclose(file) != 0)
+    {
+        perror("fclose file");
+        return;
+    }
+    if (fclose(temp) != 0)
+    {
+        perror("fclose temp");
+        return;
+    }
+
+    if (remove(FILENAME) != 0 || rename("temp.txt", FILENAME) != 0)
+    {
+        perror("File Update");
+        return;
+    }
+
+    if (!found)
+    {
+        printf("\n\x1b[31mItem Not Found!\x1b[0m\n\n");
+        return;
+    }
+    else
+    {
+        printf("\n\x1b[34mSuccessfully Updated Item Record!\x1b[0m\n\n");
         return;
     }
 }
@@ -159,6 +246,7 @@ int main()
         printf("1. Add Item\n");
         printf("2. Display Items\n");
         printf("3. Delete Item Record\n");
+        printf("4. Update Item Record\n");
         printf("0. Exit\n");
 
         printf("\nEnter your choice: ");
@@ -175,6 +263,9 @@ int main()
             break;
         case 3:
             deleteItem();
+            break;
+        case 4: 
+            updateItem();
             break;
         case 0:
             exit(0);
