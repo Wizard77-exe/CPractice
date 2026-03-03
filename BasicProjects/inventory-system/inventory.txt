@@ -1,4 +1,5 @@
-Item Name: Apple                          Quantity: 30        
-Item Name: Apple                          Quantity: 30        
-Item Name: Mango                          Quantity: 80        
-Item Name: Airplanes                      Quantity: 100       
+Item Name: Chocolate Milk                 Quantity: 300       
+Item Name: Ice Cream Milk                 Quantity: 400       
+Item Name: HelliQupter                    Quantity: 600       
+Item Name: Dairy Milk                     Quantity: 200       
+Item Name: Milky Way                      Quantity: 200       

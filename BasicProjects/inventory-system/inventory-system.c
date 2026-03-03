@@ -13,6 +13,24 @@ void flush_input()
         ;
 }
 
+int parseItem(char *line, char *name, int *qty)
+{
+    char *qpos = strstr(line, "Quantity:"); // returns the pointer to the first occurrence of the substring "Quantity:"
+    if (!qpos)
+        return 0; // checks if there's a substring "Quantity"
+
+    *qty = atoi(qpos + 9); // converts to integer the value after the "Quantity:". qpos points to Q, + 9, length of "Quantity:"
+
+    int len = qpos - (line + 11);  // gets the length of the name which sits between the line + 11: meaning start of line + 11("Item Name: ") and qpos("Quantity")
+    strncpy(name, line + 11, len); // copies the len characters from line + 11 to the name variable.
+    name[len] = '\0';              // sets the last character to '\0' because strncpy don't automatically adds a null terminator
+
+    while (len > 0 && name[len - 1] == ' ') // Removes trailing spaces
+        name[--len] = '\0';
+
+    return 1;
+}
+
 void addItem()
 {
     FILE *file = fopen(FILENAME, "a");
@@ -38,8 +56,7 @@ void addItem()
         printf("\x1b[33mEnter Quantity:\x1b[0m ");
         scanf("%u", &qty);
         flush_input();
-    } while(qty == 0);
-
+    } while (qty == 0);
 
     fprintf(file, "Item Name: %-30s Quantity: %-10u\n", item_name, qty);
     if (fclose(file) != 0)
@@ -51,20 +68,24 @@ void addItem()
     return;
 }
 
-void displayItems() {
+void displayItems()
+{
     FILE *file = fopen(FILENAME, "r");
-    if (!file) {
+    if (!file)
+    {
         perror("fopen");
         return;
     }
-    
+
     char buffer[BUFFER_SIZE];
     printf("\n");
-    while (fgets(buffer, BUFFER_SIZE, file) != NULL) {
+    while (fgets(buffer, BUFFER_SIZE, file) != NULL)
+    {
         printf("%s", buffer);
     }
 
-    if (fclose(file) != 0) {
+    if (fclose(file) != 0)
+    {
         perror("fclose");
         return;
     }
@@ -72,26 +93,96 @@ void displayItems() {
     return;
 }
 
+void deleteItem()
+{
+    FILE *file = fopen(FILENAME, "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!file || !temp)
+    {
+        perror("fopen");
+        return;
+    }
+
+    char buffer[BUFFER_SIZE];
+    char name[MAX_LEN];
+    char item_name[MAX_LEN];
+    printf("Enter Item You Want to Delete: ");
+    fgets(item_name, 30, stdin);
+    item_name[strcspn(item_name, "\n")] = '\0';
+
+    int qty;
+    int found = 0;
+
+    while (fgets(buffer, BUFFER_SIZE, file))
+    {
+        if (parseItem(buffer, name, &qty))
+        {
+            if (strcmp(name, item_name) != 0)
+                fputs(buffer, temp);
+            else
+                found = 1;
+        }
+    }
+
+    if (fclose(file) != 0 || fclose(temp) != 0)
+    {
+        perror("fclose");
+        return;
+    }
+
+    if (remove(FILENAME) != 0 || rename("temp.txt", FILENAME) != 0)
+    {
+        perror("File Update");
+        return;
+    }
+
+    if (!found)
+    {
+        printf("\n\x1b[33mItem Not Found!\x1b[0m\n\n");
+        return;
+    }
+    else
+    {
+        printf("\n\x1b[34mSuccessfully Deleted Item Record!\x1b[0m\n\n");
+        return;
+    }
+}
+
 int main()
 {
     int choice;
-    while(1) {
+    while (1)
+    {
         printf("Inventory System\n");
         printf("================\n");
         printf("1. Add Item\n");
         printf("2. Display Items\n");
+        printf("3. Delete Item Record\n");
         printf("0. Exit\n");
 
         printf("\nEnter your choice: ");
         scanf("%d", &choice);
         flush_input();
 
-        switch(choice) {
-            case 1: addItem(); break;
-            case 2: displayItems(); break;
-            case 0: exit(0); break;
-            default: printf("Invalid Choice\n");
+        switch (choice)
+        {
+        case 1:
+            addItem();
+            break;
+        case 2:
+            displayItems();
+            break;
+        case 3:
+            deleteItem();
+            break;
+        case 0:
+            exit(0);
+            break;
+        default:
+            printf("Invalid Choice\n");
         }
+        choice = 0;
     }
     return 0;
 }
