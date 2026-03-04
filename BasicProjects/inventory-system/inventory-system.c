@@ -103,10 +103,7 @@ void listRecords(FILE *file)
 {
     char buffer[BUFFER_SIZE];
 
-    printf("\n");
-    printf("==============================================================\n");
-    printf("%sINVENTORY LIST%s\n", CYAN, RESET);
-    printf("==============================================================\n");
+    printf("\n==========================%sINVENTORY%s===========================\n", CYAN, RESET);
     while (fgets(buffer, BUFFER_SIZE, file) != NULL)
     {
         printf("%s", buffer);
@@ -134,6 +131,7 @@ void addItem()
         return;
     }
     printf("%s\nSuccessfully Added an Item%s\n", CYAN, RESET);
+    printf("==============================================================\n");
     return;
 }
 
@@ -217,11 +215,13 @@ void deleteItem()
     if (!found)
     {
         printf("\n%sItem Not Found!%s\n\n", RED, RESET);
+        printf("==============================================================\n");
         return;
     }
     else
     {
         printf("\n%sSuccessfully Deleted Item Record!%s\n", CYAN, RESET);
+        printf("==============================================================\n");
         return;
     }
 }
@@ -306,11 +306,13 @@ void updateItem()
     if (!found)
     {
         printf("\n%sItem Not Found!%s\n", RED, RESET);
+        printf("==============================================================\n");
         return;
     }
     else
     {
         printf("\n%sSuccessfully Updated Item Record!%s\n", CYAN, RESET);
+        printf("==============================================================\n");
         return;
     }
 }

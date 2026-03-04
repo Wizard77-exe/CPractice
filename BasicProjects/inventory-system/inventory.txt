@@ -6,3 +6,4 @@ Item Name: Ice Cream Choco                Quantity: 300
 Item Name: Milk                           Quantity: 400       
 Item Name: Sprite                         Quantity: 200       
 Item Name: Coke                           Quantity: 400       
+Item Name: Royal                          Quantity: 80        
