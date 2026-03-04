@@ -20,17 +20,17 @@ void flush_input()
 
 int parseItem(char *line, char *name, int *qty)
 {
-    char *qpos = strstr(line, "Quantity:"); // returns the pointer to the first occurrence of the substring "Quantity:"
+    char *qpos = strstr(line, "Quantity:"); 
     if (!qpos)
-        return 0; // checks if there's a substring "Quantity"
+        return 0;
 
-    *qty = atoi(qpos + 9); // converts to integer the value after the "Quantity:". qpos points to Q, + 9, length of "Quantity:"
+    *qty = atoi(qpos + 9); 
 
-    int len = qpos - (line + 11);  // gets the length of the name which sits between the line + 11: meaning start of line + 11("Item Name: ") and qpos("Quantity")
-    strncpy(name, line + 11, len); // copies the len characters from line + 11 to the name variable.
-    name[len] = '\0';              // sets the last character to '\0' because strncpy don't automatically adds a null terminator
+    int len = qpos - (line + 11);  
+    strncpy(name, line + 11, len); 
+    name[len] = '\0'; 
 
-    while (len > 0 && name[len - 1] == ' ') // Removes trailing spaces
+    while (len > 0 && name[len - 1] == ' ')
     {
         name[--len] = '\0';
     }
@@ -58,17 +58,8 @@ int isExisting(FILE *file, char *item)
     return 0;
 }
 
-void addItem()
+void getItemName(FILE *file, char *item_name)
 {
-    FILE *file = fopen(FILENAME, "a+");
-    char item_name[MAX_LEN];
-    unsigned int qty;
-    if (!file)
-    {
-        perror("fopen");
-        return;
-    }
-
     while (1)
     {
         printf("%sEnter Item Name:%s ", YELLOW, RESET);
@@ -89,17 +80,52 @@ void addItem()
 
         break; // valid input
     }
+}
 
-    do
-    {
-        printf("%sWarning:%s Quantity cannot be Zero!\n", RED, RESET);
+void getQuantity(unsigned int *qty)
+{
+    while(1) {
         printf("%sEnter Quantity:%s ", YELLOW, RESET);
-        if (scanf("%u", &qty) != 1)
-        {
-            printf("Invalid input!\n");
-            flush_input(); // clear stdin
+        if(scanf("%u", qty) != 1) {
+            flush_input();
+            printf("%sInvalid Input!\n", RED);
+            continue;
         }
-    } while (qty == 0);
+        if (*qty == 0) {
+            printf("%sQuantity Cannot be Zero!%s\n", RED, RESET);
+            continue;
+        }
+        break;
+    }
+}
+
+void listRecords(FILE *file)
+{
+    char buffer[BUFFER_SIZE];
+
+    printf("\n");
+    printf("==============================================================\n");
+    printf("%sINVENTORY LIST%s\n", CYAN, RESET);
+    printf("==============================================================\n");
+    while (fgets(buffer, BUFFER_SIZE, file) != NULL)
+    {
+        printf("%s", buffer);
+    }
+    printf("==============================================================\n");
+}
+
+void addItem()
+{
+    FILE *file = fopen(FILENAME, "a+");
+    char item_name[MAX_LEN];
+    unsigned int qty;
+    if (!file)
+    {
+        perror("fopen");
+        return;
+    }
+    getItemName(file, item_name);
+    getQuantity(&qty);
 
     fprintf(file, "Item Name: %-30s Quantity: %-10u\n", item_name, qty);
     if (fclose(file) != 0)
@@ -119,17 +145,7 @@ void displayItems()
         perror("fopen");
         return;
     }
-
-    char buffer[BUFFER_SIZE];
-    printf("\n");
-    printf("==============================================================\n");
-    printf("%sINVENTORY LIST%s\n", CYAN, RESET);
-    printf("==============================================================\n");
-    while (fgets(buffer, BUFFER_SIZE, file) != NULL)
-    {
-        printf("%s", buffer);
-    }
-    printf("==============================================================\n");
+    listRecords(file);
 
     if (fclose(file) != 0)
     {
@@ -141,27 +157,12 @@ void displayItems()
     return;
 }
 
-void deleteItem()
+int findItem(FILE *file, FILE *temp, char *item_name)
 {
-    FILE *file = fopen(FILENAME, "r");
-    FILE *temp = fopen("temp.txt", "w");
-
-    if (!file || !temp)
-    {
-        perror("fopen");
-        return;
-    }
-
-    char buffer[BUFFER_SIZE];
-    char name[MAX_LEN];
-    char item_name[MAX_LEN];
-    printf("\n%sEnter Item You Want to Delete:%s ", YELLOW, RESET);
-    fgets(item_name, 30, stdin);
-    item_name[strcspn(item_name, "\n")] = '\0';
-
     int qty;
     int found = 0;
-
+    char buffer[BUFFER_SIZE];
+    char name[MAX_LEN];
     while (fgets(buffer, BUFFER_SIZE, file))
     {
         if (!parseItem(buffer, name, &qty))
@@ -175,6 +176,26 @@ void deleteItem()
         else
             found = 1;
     }
+    return found;
+}
+
+void deleteItem()
+{
+    FILE *file = fopen(FILENAME, "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!file || !temp)
+    {
+        perror("fopen");
+        return;
+    }
+
+    char item_name[MAX_LEN];
+    printf("\n%sEnter Item You Want to Delete:%s ", YELLOW, RESET);
+    fgets(item_name, MAX_LEN, stdin);
+    item_name[strcspn(item_name, "\n")] = '\0';
+
+    int found = findItem(file, temp, item_name);
 
     if (fclose(file) != 0)
     {
@@ -205,26 +226,12 @@ void deleteItem()
     }
 }
 
-void updateItem()
+int getNewQuantity(FILE *file, FILE *temp, char *item_name)
 {
-    FILE *file = fopen(FILENAME, "r");
-    FILE *temp = fopen("temp.txt", "w");
-
-    if (!file || !temp)
-    {
-        perror("fopen");
-        return;
-    }
-
     int qty;
     int found = 0;
     char name[MAX_LEN];
-    char item_name[MAX_LEN];
     char buffer[BUFFER_SIZE];
-
-    printf("\n%sEnter the Item Name:%s ", YELLOW, RESET);
-    fgets(item_name, MAX_LEN, stdin);
-    item_name[strcspn(item_name, "\n")] = '\0';
 
     while (fgets(buffer, BUFFER_SIZE, file))
     {
@@ -254,6 +261,30 @@ void updateItem()
             fprintf(temp, "Item Name: %-30s Quantity: %-10u\n", name, qty);
         }
     }
+
+    return found;
+}
+
+void updateItem()
+{
+    FILE *file = fopen(FILENAME, "r");
+    FILE *temp = fopen("temp.txt", "w");
+
+    if (!file || !temp)
+    {
+        perror("fopen");
+        return;
+    }
+
+    
+    char item_name[MAX_LEN];
+    
+
+    printf("\n%sEnter the Item Name:%s ", YELLOW, RESET);
+    fgets(item_name, MAX_LEN, stdin);
+    item_name[strcspn(item_name, "\n")] = '\0';
+
+    int found = getNewQuantity(file, temp, item_name);
 
     if (fclose(file) != 0)
     {

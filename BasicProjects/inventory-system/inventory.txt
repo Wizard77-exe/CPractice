@@ -1,8 +1,8 @@
 Item Name: Ice Cream Milk                 Quantity: 400       
 Item Name: Dairy Milk                     Quantity: 200       
-Item Name: Chocolate Milk                 Quantity: 10000     
-Item Name: Milky Way                      Quantity: 10        
+Item Name: Chocolate Milk                 Quantity: 100       
+Item Name: Milky Way                      Quantity: 100       
 Item Name: Ice Cream Choco                Quantity: 300       
-Item Name: Milk                           Quantity: 100       
-Item Name: Chocolate                      Quantity: 300       
-Item Name: Royal                          Quantity: 300       
+Item Name: Milk                           Quantity: 400       
+Item Name: Sprite                         Quantity: 200       
+Item Name: Coke                           Quantity: 400       
