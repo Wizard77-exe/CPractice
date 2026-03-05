@@ -102,3 +102,8 @@ __|__
 ************************
 Game Over! The word was: MANGO
 ```
+---
+## FUTURE IMPROVEMENT
+---
+1. Adding a Restart or Quit choice when game over.
+2. Adding a Score Label that shows The Correct Guesses. (i.e., 1 correct Guess = 100 score)
