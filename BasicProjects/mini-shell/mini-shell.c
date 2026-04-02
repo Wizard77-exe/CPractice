@@ -20,10 +20,15 @@ void print(const char *str) {
 int main() {
     char command[MAX_LEN];
 
-    while (strcmp(command, "exit") != 0) {
+    while (1) {
         printf("Mini-shell::> ");
         fgets(command, MAX_LEN, stdin);
+
         command[strcspn(command, "\n")] = '\0';
+
+        if (strcmp(command, "exit") == 0) break;
+
+        printf("%s\n", command);
     }
     return 0;
 }
