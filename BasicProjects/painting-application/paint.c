@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <math.h>
 
 bool initSDL() {
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
