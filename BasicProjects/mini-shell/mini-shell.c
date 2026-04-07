@@ -3,19 +3,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 
 #define MAX_LEN 255
-
-void print(const char *str) {
-    if (*str == '\"') {
-        str++;
-        while (str) {
-            putchar(*str);
-            if (*str == '\"') break;
-            str++;
-        }
-    }
-}
 
 int main() {
     char command[MAX_LEN];
@@ -27,6 +17,8 @@ int main() {
         command[strcspn(command, "\n")] = '\0';
 
         if (strcmp(command, "exit") == 0) break;
+
+        // fork() echo
 
         printf("%s\n", command);
     }
